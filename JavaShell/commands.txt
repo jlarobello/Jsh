@@ -1,0 +1,17 @@
+ls .
+cat somefile
+
+
+
+cat -h
+kls /tmp
+pwd
+cd ..
+pwd
+ls ics332_pa3_jlar808
+cd foo
+cd ../../whatever
+cd ics332_pa3_jlar808 bogus
+echo 'hello world!'
+cp somefile /tmp
+cd /
