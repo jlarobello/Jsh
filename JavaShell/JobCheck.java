@@ -4,7 +4,7 @@ import java.lang.Process;
 import java.lang.Thread;
 
 /**
- * A thread that checks a Processes status. Processes its input/err
+ * A thread that checks a Process status. Processes its input/err
  * streams once process is done.
  *
  * @author Jonathan Robello
