@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.lang.Thread;
 
 /**
- * Program that sends an InputStream from an
+ * Program that sends an InputStream to a
  * OutputStream in a thread.
  *
  * @author Jonathan Robello
