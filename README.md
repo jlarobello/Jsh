@@ -15,7 +15,7 @@ Before building, cd into the JavaShell directory. Then run the following command
 ```
 make run
 ```
-Additonaly, run Jsh with
+Run with java command after building
 ```
 java Jsh
 ```
