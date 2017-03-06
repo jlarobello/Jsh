@@ -11,7 +11,7 @@ vagrant ssh
 cd /vagrant/JavaShell
 ```
 ## Build and Run
-Before building, cd into the JavaShell directory. After, run the following command to build and run the shell
+Before building, cd into the JavaShell directory. Then run the following command to build and run the shell
 ```
 make run
 ```
