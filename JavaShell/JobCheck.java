@@ -18,10 +18,10 @@ public class JobCheck extends Thread {
     }
 
     public void run() {
-        // while (isRunning(process));
-
         Jsh.createPipe(process.getInputStream(), new PrintStream(System.out)).start();
         Jsh.createPipe(process.getErrorStream(), new PrintStream(System.err)).start();
+
+        while (isRunning(process));
         
         try {
             process.waitFor();
