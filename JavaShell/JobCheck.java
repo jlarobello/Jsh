@@ -29,6 +29,8 @@ public class JobCheck extends Thread {
             e.printStackTrace();
             process.destroy();
         }
+
+        return;
     }
 
     /**

@@ -42,13 +42,16 @@ public class PipeThread extends Thread {
          int in;
          byte[] buf = new byte[1024];
 
-         try {
-             while ((in = input.read(buf)) != -1) {
-                 output.write(buf, 0, in);
-             }
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
+         if (input != null && output != null) {
+            try {
+                while ((in = input.read(buf)) != -1) 
+                    output.write(buf, 0, in);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return;
      }
 
     /**
@@ -69,4 +72,3 @@ public class PipeThread extends Thread {
         this.output = output;
     }
 }
-

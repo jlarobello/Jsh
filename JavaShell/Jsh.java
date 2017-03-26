@@ -37,14 +37,24 @@ public class Jsh {
             try {
                 input = br.readLine();
                 input = input.trim();
-                command = new LinkedList< String >(Arrays.asList(input.split("\\s+")));
+                command = processInput(input);
 
-                if (input.equals(""))
+                if (input.equals("")) {
                     continue;
-                else if (command.get(0).equals("exit"))
+                }
+                else if (input.charAt(0) == '|' || input.charAt(input.length() - 1) == '|') {
+                    System.out.println("syntax error near unexpected token `|'");
+                    continue;
+                } else if (command.get(command.size() - 1).equals("&")) {
+                    System.out.println("syntax error near unexpected token '&'");
+                    continue;
+                }
+                else if (command.get(0).equals("exit")) {
                     break;
-                else
+                }
+                else {
                     execCommand(command);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (NullPointerException e) {
@@ -62,14 +72,11 @@ public class Jsh {
      */
     private static void execCommand(List < String > command) {
         
-        if (command.get(0).equals("cd"))
-            cd(command);
-        else if (command.get(0).equals("jobs"))
-            jobs(command);
-        else if (command.get(0).equals("fg"))
-            fg(command);
-        else
-            createProcess(command);
+        if (command.get(command.size() - 1).charAt(command.get(command.size() - 1).length() - 1) == '&') {
+            createJobs(command);
+        } else {
+            createProcesses(command);
+        }
     }
 
     /**
@@ -113,10 +120,10 @@ public class Jsh {
      *
      * @param command the command list.
      */
-    private static void createProcess(List< String > command) {
+    private static InputStream createProcess(List< String > command, InputStream in) {
         int error = 0;
         ProcessBuilder pb = null;
-        Process process = null;
+        Process process   = null;
         
         if (command.get(command.size() - 1).equals("&")) {
             
@@ -141,15 +148,35 @@ public class Jsh {
                 pb = new ProcessBuilder(command);
                 pb.directory(new File(current_dir));
                 process = pb.start();
-                createPipe(process.getInputStream(), new PrintStream(System.out)).start();
+
+                pipe(in, process.getOutputStream());
                 createPipe(process.getErrorStream(), new PrintStream(System.err)).start();
                 error = process.waitFor();
+
+                return process.getInputStream();
             } catch (IOException e) {
                 System.out.println("Unknown command '" + command.get(0) + "'");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+        return null;
+    }
+
+    /**
+     * pipe input to output stream.
+     * 
+     * @param in the input.
+     * @param out the output.
+     */
+    public static void pipe(InputStream in, OutputStream out) throws IOException {
+        int n;
+        byte[] buf = new byte[1024];
+        while ((n = in.read(buf)) > -1) {
+            out.write(buf, 0, n);
+        }
+        out.close();
     }
 
     /**
@@ -171,7 +198,7 @@ public class Jsh {
      */
     private static void fg(List< String > command) {
         if (command.get(command.size() - 1).equals("&"))
-            System.out.println("Error: cannot put 'fg' in the bacground");
+            System.out.println("Error: cannot put 'fg' in the background");
         else {
             try {
                 int i = 0, num = Integer.valueOf(command.get(1));
@@ -219,17 +246,89 @@ public class Jsh {
     }
 
     /**
-     * Check if a process is still running.
+     * Process input
      *
-     * @param process the process.
-     * @return whether the process is running or not.
+     * @param input the input.
+     * @return a list of proccessed strings.
      */
-    public static boolean isRunning(Process process) {
-        try {
-            process.exitValue();
-            return false;
-        } catch (Exception e) {
-            return true;
+    public static List< String > processInput(String input) {
+        String command = "";
+        List< String > commands = new LinkedList< String >(Arrays.asList(input.split("\\|")));
+
+        for (int i = 0; i < commands.size(); i++) {
+            command = commands.get(i);
+            command = command.trim().replaceAll(" +", " ");
+            commands.set(i, command);
+        }
+
+        return commands;
+    }
+
+    /**
+     * Creates processes
+     *
+     * @param commands the list of commands.
+     */
+    public static void createProcesses(List< String > commands) {
+        List< String > command = null;
+
+        PipeThread pipe  = null;
+        InputStream in = new ByteArrayInputStream("".getBytes());;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        
+        for (int i = 0; i < commands.size(); i++) {
+            command = new LinkedList< String >(Arrays.asList(commands.get(i).split("\\s+")));
+
+            if (command.get(0).equals("cd")) {
+                cd(command);
+                in = new ByteArrayInputStream("".getBytes());
+            } else if (command.get(0).equals("jobs")) {
+                jobs(command);
+                in = new ByteArrayInputStream("".getBytes());
+            } else if (command.get(0).equals("fg")) {
+                fg(command);
+                in = new ByteArrayInputStream("".getBytes());
+            } else if (i == commands.size() - 1) {
+                in = createProcess(command, in);
+                pipe = createPipe(in, System.out);
+                pipe.start();
+                while (pipe.isAlive());
+            } else {
+                in = createProcess(command, in);
+                pipe = createPipe(in, out);
+                pipe.start();
+                while (pipe.isAlive());
+                in = new ByteArrayInputStream(out.toByteArray());
+
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                out = new ByteArrayOutputStream();
+            } 
+        }
+    }
+
+    /**
+     * Create jobs
+     *
+     * @param commands the list of commands.
+     */
+    public static void createJobs(List< String > commands) {
+        List< String > command = new LinkedList< String >(Arrays.asList(commands.get(0).split("\\s+")));
+
+        if (command.get(0).equals("cd")) {
+            cd(command);
+        }
+        else if (command.get(0).equals("jobs")) {
+            jobs(command);
+        }
+        else if (command.get(0).equals("fg")) {
+            fg(command);
+        } else {
+            createProcess(command, null);
         }
     }
 }
