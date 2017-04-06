@@ -1,9 +1,9 @@
 # Jsh
 A Java based shell that provides functions of a real shell
 ## Prerequsites
-Can only be run on unix-like os. Install latest [make](https://www.gnu.org/software/make/) and at least [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) before running.
+[Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 ### Running on VM via Vagrant
-Ensure [VirtualBox](https://www.virtualbox.org/wiki/VirtualBox) and [Vagrant](https://www.vagrantup.com/docs/getting-started/) installed before running Vagrantfile. cd into repo. Then run
+Install VirtualBox and Vagrant then run...
 ```
 vagrant up
 vagrant provision
@@ -11,12 +11,8 @@ vagrant ssh
 cd /vagrant/JavaShell
 ```
 ## Build and Run
-Before building, cd into the JavaShell directory. Then run the following command to build and run the shell
 ```
-make run
-```
-Run with java command after building
-```
+make
 java Jsh
 ```
 ## Built With
