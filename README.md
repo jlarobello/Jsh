@@ -3,7 +3,7 @@ A Java based shell that provides functions of a real shell
 ## Prerequsites
 [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 ### Running on VM via Vagrant
-Install VirtualBox and Vagrant then run...
+Install VirtualBox and Vagrant and execute the following before running
 ```
 vagrant up
 vagrant provision
